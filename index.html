@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
+	<title>Web Socket Chat</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		body { background-color: #eeeeee; }
+		#logo {
+			position: absolute;
+			top: 20px;
+			left: 20px;
+			color: #666;
+			font-size: 16px;
+		}
+		.wrapper {
+			font-size: 16px;
+			margin: 60px 20px; 0;
+			padding: 20px;
+			background-color: #ffffff;
+			-webkit-border-radius: 5px;
+			-webkit-box-shadow: 0 0 3px #999;
+			-webkit-box-sizing: border-box;
+		}
+		#message-box { margin-top: 10px; }
+		.wkbox {
+			display: box;
+			display: -webkit-box;
+			box-align: center;
+			-webkit-box-align: center;
+		}
+		.flex { box-flex: 1; -webkit-box-flex: 1; }
+		.ml { margin-left: 10px; }
+		#input-message {
+			font-size: 16px;
+			padding: 4px;
+			border: 1px solid #aaa;
+			width: 100%;
+			-webkit-border-radius: 4px;
+			-webkit-box-sizing: border-box;
+		}
+		span {
+			padding: 4px 12px;
+			color: #ffffff;
+			background-color: #1575cf;
+			border: 1px solid #0c4e8c;
+			-webkit-border-radius: 4px;
+		}
+		span:hover { background-color: #4d9eea; }
+		.animation {
+			-webkit-animation: animation 0.3s ease-in-out 1;
+		}
+		@-webkit-keyframes animation {
+			0% { opacity: 0; -webkit-transform: translate(0,-8px); }
+			100% { opacity: 1; -webkit-transform: translate(0,0); }
+		}
+	</style>
+</head>
+<body>
+	<h1 id="logo">Web Socket Chat</h1>
+	<div class="wrapper animation">
+		<form action="" method="post" onsubmit="publishMessage(); return false;">
+			<div class="wkbox">
+				<div class="flex"><input type="text" id="input-message"></div>
+				<div class="ml"><span onclick="publishMessage();">送信</span></div>
+			</div>
+		</form>
+		<div id="message-box"></div>
+	</div>
+	
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		var socketio = io.connect('http://localhost:8080'),
+			messageBox = document.getElementById("message-box"),
+			textInput = document.getElementById("input-message");
+		
+		socketio.on("connected", function(){});
+		socketio.on("disconnect", function(client){});
+		socketio.on("publish", function(data){
+			addMessage(data.value);
+		});
+		
+		var webSocketStart = function () {
+			socketio.emit("connected");
+		}
+		
+		var publishMessage = function () {
+			var msg = textInput.value;
+			socketio.emit("publish", {value: msg});
+			textInput.value = "";
+		}
+		
+		var addMessage = function (msg) {
+			var msgDom = document.createElement('div');
+			msgDom.className = 'animation';
+			msgDom.innerHTML = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+			messageBox.appendChild(msgDom);
+		}
+		
+		webSocketStart();
+	</script>
+</body>
+</html>
